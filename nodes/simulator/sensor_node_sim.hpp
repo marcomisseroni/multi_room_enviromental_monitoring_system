@@ -2,11 +2,12 @@
 #ifndef SENSOR_NODE_SIM_HPP
 #define SENSOR_NODE_SIM_HPP
 
-#include <mosquitto/libmosquittopp.h>
+#include <random>
+#include <mosquitto/libmosquitto.h>
 
 namespace mqtt_node {
 
-    class SensorNodeSim : public mosqpp::mosquittopp {
+    class SensorNodeSim {
 
         public:
 
@@ -15,6 +16,7 @@ namespace mqtt_node {
             ~SensorNodeSim();
 
             void set_seed(int new_seed);
+            void spin();
 
         private:
 
@@ -31,12 +33,14 @@ namespace mqtt_node {
             const char *_hum_topic = "humidity_sensor";
             const char *_press_topic = "pressure_sensor";
             const char *_air_q_topic = "air_quality_sensor";
+            std::default_random_engine generator;
+
+            mosquitto *client;
 
             void generate_data();
             int publish_data(float temp, float hum, float press, float air_q);
-            void on_connect(int rc) override;
-            void on_disconnect(int rc) override;
-
+            static void on_connect_callback(struct mosquitto *mosq, void *userdata, int rc);
+            static void on_disconnect_callback(struct mosquitto *mosq, void *userdata, int rc);
     };
 
 }

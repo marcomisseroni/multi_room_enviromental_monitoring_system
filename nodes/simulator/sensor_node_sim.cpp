@@ -1,5 +1,7 @@
 #include <iostream>
-#include <random>
+#include <thread>
+#include <chrono>
+#include <string>
 #include "sensor_node_sim.hpp"
 
 using namespace std;
@@ -7,11 +9,10 @@ using namespace std;
 namespace mqtt_node {
 
     SensorNodeSim::SensorNodeSim(float temp_mean, float hum_mean, float press_mean, float air_qual_mean, 
-                    float temp_std, float hum_std, float press_std, float air_qual_std) 
-                    : mosquittopp("sensor_sim_node") {
+                    float temp_std, float hum_std, float press_std, float air_qual_std) {
 
         // Initialize mosquitto library
-        mosqpp::lib_init();
+        mosquitto_lib_init();
 
         // Parameters initialization
         _temperature_mean = temp_mean;
@@ -23,15 +24,24 @@ namespace mqtt_node {
         _pressure_std = press_std;
         _air_quality_std = air_qual_std;
         _seed = 0;
+        generator.seed(_seed);
 
+        // Initialize mqtt client
+        client = mosquitto_new("sensor_node", true, this);
+
+        // mqtt callbacks
+        mosquitto_connect_callback_set(client, on_connect_callback);
+        mosquitto_disconnect_callback_set(client, on_disconnect_callback);
+ 
         // mqtt connection
-        connect("localhost", 1883, 60);
-        loop_start();
+        mosquitto_connect(client, "localhost", 1883, 60);
+        mosquitto_loop_start(client);
+
     }
 
     SensorNodeSim::~SensorNodeSim() {
-        disconnect();
-        loop_stop();
+        mosquitto_disconnect(client);
+        mosquitto_loop_stop(client, false);
     }
 
     void SensorNodeSim::set_seed(int new_seed) {
@@ -39,7 +49,6 @@ namespace mqtt_node {
     }
 
     void SensorNodeSim::generate_data() {
-        std::default_random_engine generator(_seed);
         std::normal_distribution<float> temp_dis(_temperature_mean, _temperature_std);
         std::normal_distribution<float> hum_dis(_humidity_mean, _humidity_std);
         std::normal_distribution<float> press_dis(_pressure_mean, _pressure_std);
@@ -60,20 +69,28 @@ namespace mqtt_node {
         string press_payload = to_string(press);
         string air_q_payload = to_string(air_q);
 
-        publish(nullptr, _temp_topic, temp_payload.size(), temp_payload.c_str());
-        publish(nullptr, _hum_topic, hum_payload.size(), hum_payload.c_str());
-        publish(nullptr, _press_topic,press_payload.size(), press_payload.c_str());
-        publish(nullptr, _air_q_topic, air_q_payload.size(), air_q_payload.c_str());
+        mosquitto_publish(client, nullptr, _temp_topic, temp_payload.size(), temp_payload.c_str(), 2, true);
+        mosquitto_publish(client, nullptr, _hum_topic, hum_payload.size(), hum_payload.c_str(), 2, true);
+        mosquitto_publish(client, nullptr, _press_topic,press_payload.size(), press_payload.c_str(), 2, true);
+        mosquitto_publish(client, nullptr, _air_q_topic, air_q_payload.size(), air_q_payload.c_str(), 2, true);
 
         // handle mqtt errors
         return 0;
     }
 
-    void SensorNodeSim::on_connect(int rc) {
-        cerr << "Connected to broker" << endl;
+    void SensorNodeSim::spin() {
+
+        while(true) {
+            generate_data();
+            std::this_thread::sleep_for(std::chrono::seconds(2));
+        }
     }
 
-    void SensorNodeSim::on_disconnect(int rc) {
-        cerr << "Disconneted" << endl;
+    void SensorNodeSim::on_connect_callback(struct mosquitto *mosq, void *userdata, int rc) {
+        cerr << "Connected rc = " << rc << endl;
+    }
+
+    void SensorNodeSim::on_disconnect_callback(struct mosquitto *mosq, void *userdata, int rc) {
+        cerr << "Disconnected" << endl;
     }
 }
