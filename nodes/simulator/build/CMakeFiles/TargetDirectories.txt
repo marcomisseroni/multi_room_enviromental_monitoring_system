@@ -1,3 +1,0 @@
-/home/m4rc0m55/marco/uni/magistrale/IoT/multi_room_enviromental_monitoring_system/nodes/simulator/build/CMakeFiles/sensor_sim.dir
-/home/m4rc0m55/marco/uni/magistrale/IoT/multi_room_enviromental_monitoring_system/nodes/simulator/build/CMakeFiles/edit_cache.dir
-/home/m4rc0m55/marco/uni/magistrale/IoT/multi_room_enviromental_monitoring_system/nodes/simulator/build/CMakeFiles/rebuild_cache.dir

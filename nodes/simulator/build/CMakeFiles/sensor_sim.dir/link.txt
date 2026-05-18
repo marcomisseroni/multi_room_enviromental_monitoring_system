@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/sensor_sim.dir/main.cpp.o CMakeFiles/sensor_sim.dir/sensor_node_sim.cpp.o -o sensor_sim  -lmosquitto -lpthread 
