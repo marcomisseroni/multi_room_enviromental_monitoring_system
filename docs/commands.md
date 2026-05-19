@@ -29,5 +29,11 @@ After starting the broker you can launch the node using:
 To stop the broker you can use:
 
 ```
-sudo systemctl stop mposquitto
+sudo systemctl stop mosquitto
+```
+
+To subscribe to a topic and check the messages you can use:
+
+```
+mosquitto_sub -h <broker_ip> -t topic
 ```

@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_executable(sensor_sim
     main.cpp
     sensor_node_sim.cpp
+    gateway_sim.cpp
 )
 
 find_package(PkgConfig REQUIRED)

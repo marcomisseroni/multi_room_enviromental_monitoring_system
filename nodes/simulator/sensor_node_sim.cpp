@@ -29,6 +29,11 @@ namespace mqtt_node {
         // Initialize mqtt client
         client = mosquitto_new("sensor_node", true, this);
 
+        if(client == NULL) {
+            cerr << "Error: Couldn't initialize mosquitto struct" << endl;
+            return;
+        }
+
         // mqtt callbacks
         mosquitto_connect_callback_set(client, on_connect_callback);
         mosquitto_disconnect_callback_set(client, on_disconnect_callback);
