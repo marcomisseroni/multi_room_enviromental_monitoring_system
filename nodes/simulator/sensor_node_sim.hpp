@@ -4,6 +4,8 @@
 
 #include <random>
 #include <mosquitto/libmosquitto.h>
+#include <string>
+
 
 namespace mqtt_node {
 
@@ -11,7 +13,7 @@ namespace mqtt_node {
 
         public:
 
-            SensorNodeSim(float temp_mean = 20, float hum_mean = 40, float press_mean = 1013, float air_qual_mean = 100, 
+            SensorNodeSim(std::string room_name, float temp_mean = 20, float hum_mean = 40, float press_mean = 1013, float air_qual_mean = 100, 
                 float temp_std = 2, float hum_std = 10, float press_std = 20, float air_qual_std = 20);
             ~SensorNodeSim();
 
@@ -29,11 +31,15 @@ namespace mqtt_node {
             float _pressure_std;
             float _air_quality_std;
             int _seed;
-            const char *_temp_topic = "temperature_sensor";
-            const char *_hum_topic = "humidity_sensor";
-            const char *_press_topic = "pressure_sensor";
-            const char *_air_q_topic = "air_quality_sensor";
+            std::string _temp_topic = "temperature_sensor";
+            std::string _hum_topic = "humidity_sensor";
+            std::string _press_topic = "pressure_sensor";
+            std::string _air_q_topic = "air_quality_sensor";
+            std::string _room_name;
+            int _room_id;
             std::default_random_engine generator;
+            
+            inline static int _room_count = 0;
 
             mosquitto *client;
 

@@ -5,6 +5,7 @@
 - Raspberry Pi (Linux)
 - Python 3.10+
 - MQTT broker (Mosquitto)
+- InfluxDB
 
 ---
 
@@ -13,4 +14,19 @@
 ```bash
 sudo apt update
 sudo apt install mosquitto mosquitto-clients
-sudo systemctl enable mosquitto
+```
+## 2. Install InfluxDB
+
+```bash
+sudo apt install influxdb
+```
+
+## 3. Verify services
+
+```bash
+sudo systemctl start influxdb
+sudo systemctl start mosquitto
+
+sudo systemctl status influxdb
+sudo systemctl status mosquitto.service
+```

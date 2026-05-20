@@ -1,2 +1,5 @@
 # Build folder
 build/
+
+# Virtual enviroment
+venv/

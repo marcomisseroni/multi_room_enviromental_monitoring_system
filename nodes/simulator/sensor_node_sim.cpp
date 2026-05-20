@@ -1,18 +1,14 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
-#include <string>
 #include "sensor_node_sim.hpp"
 
 using namespace std;
 
 namespace mqtt_node {
 
-    SensorNodeSim::SensorNodeSim(float temp_mean, float hum_mean, float press_mean, float air_qual_mean, 
+    SensorNodeSim::SensorNodeSim(std::string room_name, float temp_mean, float hum_mean, float press_mean, float air_qual_mean, 
                     float temp_std, float hum_std, float press_std, float air_qual_std) {
-
-        // Initialize mosquitto library
-        mosquitto_lib_init();
 
         // Parameters initialization
         _temperature_mean = temp_mean;
@@ -25,9 +21,22 @@ namespace mqtt_node {
         _air_quality_std = air_qual_std;
         _seed = 0;
         generator.seed(_seed);
+        _room_name = room_name;
+        _room_id = _room_count++;
+
+        _temp_topic = _room_name + "/" + _temp_topic;
+        _hum_topic = _room_name + "/" + _hum_topic;
+        _press_topic = _room_name + "/" + _press_topic;
+        _air_q_topic = _room_name + "/" + _air_q_topic;
+
+        if(_room_id == 0) {
+            // Initialize mosquitto library
+            mosquitto_lib_init();
+        }
 
         // Initialize mqtt client
-        client = mosquitto_new("sensor_node", true, this);
+        string client_id = "sensor_node_" + to_string(_room_id);
+        client = mosquitto_new(client_id.c_str(), true, this);
 
         if(client == NULL) {
             cerr << "Error: Couldn't initialize mosquitto struct" << endl;
@@ -69,15 +78,15 @@ namespace mqtt_node {
 
     int SensorNodeSim::publish_data(float temp, float hum, float press, float air_q) {
 
-        string temp_payload = to_string(temp);
-        string hum_payload = to_string(hum);
-        string press_payload = to_string(press);
-        string air_q_payload = to_string(air_q);
+        std::string temp_payload = to_string(temp);
+        std::string hum_payload = to_string(hum);
+        std::string press_payload = to_string(press);
+        std::string air_q_payload = to_string(air_q);
 
-        mosquitto_publish(client, nullptr, _temp_topic, temp_payload.size(), temp_payload.c_str(), 2, true);
-        mosquitto_publish(client, nullptr, _hum_topic, hum_payload.size(), hum_payload.c_str(), 2, true);
-        mosquitto_publish(client, nullptr, _press_topic,press_payload.size(), press_payload.c_str(), 2, true);
-        mosquitto_publish(client, nullptr, _air_q_topic, air_q_payload.size(), air_q_payload.c_str(), 2, true);
+        mosquitto_publish(client, nullptr, _temp_topic.c_str(), temp_payload.size(), temp_payload.c_str(), 2, true);
+        mosquitto_publish(client, nullptr, _hum_topic.c_str(), hum_payload.size(), hum_payload.c_str(), 2, true);
+        mosquitto_publish(client, nullptr, _press_topic.c_str(),press_payload.size(), press_payload.c_str(), 2, true);
+        mosquitto_publish(client, nullptr, _air_q_topic.c_str(), air_q_payload.size(), air_q_payload.c_str(), 2, true);
 
         // handle mqtt errors
         return 0;
