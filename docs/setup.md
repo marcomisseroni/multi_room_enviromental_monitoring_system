@@ -40,6 +40,8 @@ docker rm <container_name>
 
 ## 3. Verify services
 
+If you run InfluxDB on docker you don't need to verify the service.
+
 ```bash
 sudo systemctl start influxdb
 sudo systemctl start mosquitto
@@ -47,3 +49,14 @@ sudo systemctl start mosquitto
 sudo systemctl status influxdb
 sudo systemctl status mosquitto.service
 ```
+
+## 4. Initialize InfluxDB
+
+Write in the browser:
+
+```bash
+http://localhost:8086
+```
+
+you can use the ip where the InlfuxDB service is running instead of `localhost`.
+Then log in with your `name` and `password` then insert the `organization` and `bucket` that should match the info in the gateway python script. Then generate a new `token` or use an old one, then assign it to the token variable in the gateway script.

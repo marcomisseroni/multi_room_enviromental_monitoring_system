@@ -24,10 +24,10 @@ namespace mqtt_node {
         _room_name = room_name;
         _room_id = _room_count++;
 
-        _temp_topic = _room_name + "/" + _temp_topic;
-        _hum_topic = _room_name + "/" + _hum_topic;
-        _press_topic = _room_name + "/" + _press_topic;
-        _air_q_topic = _room_name + "/" + _air_q_topic;
+        _temp_topic = "home/" + _room_name + "/" + _temp_topic;
+        _hum_topic = "home/" + _room_name + "/" + _hum_topic;
+        _press_topic = "home/" + _room_name + "/" + _press_topic;
+        _air_q_topic = "home/" + _room_name + "/" + _air_q_topic;
 
         if(_room_id == 0) {
             // Initialize mosquitto library
