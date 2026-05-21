@@ -1,4 +1,5 @@
 #include <iostream>
+#include <thread>
 #include "sensor_node_sim.hpp"
  #include "gateway_sim.hpp"
 
@@ -10,9 +11,13 @@ int main() {
     mqtt_node::SensorNodeSim sensor_node_sim2("room2");
     mqtt_node::SensorNodeSim sensor_node_sim3("room3");
 
-    sensor_node_sim1.spin();
-    sensor_node_sim2.spin();
-    sensor_node_sim3.spin();
+    thread t1(&mqtt_node::SensorNodeSim::spin, &sensor_node_sim1);
+    thread t2(&mqtt_node::SensorNodeSim::spin, &sensor_node_sim2);
+    thread t3(&mqtt_node::SensorNodeSim::spin, &sensor_node_sim3);
+
+    t1.join();
+    t2.join();
+    t3.join();
 
     return 0;
 }

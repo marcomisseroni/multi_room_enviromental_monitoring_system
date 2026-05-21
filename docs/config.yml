@@ -1,0 +1,11 @@
+mqtt:
+  broker_ip: 192.168.1.17
+  port: 1883
+  topic_base: home
+
+influxdb:
+  ip: 192.168.1.17
+  port: 8086
+  bucket: sensor_data
+  org: iot_project
+  token: 3WBNOqEAbSQJWAYWLvm-Cs0_PFgOk4Ir-MFOdknVzSgiEYcGhPpJGEJGaOqyKEOjKGB7IHCOTAyzGPU-yqkPOw==

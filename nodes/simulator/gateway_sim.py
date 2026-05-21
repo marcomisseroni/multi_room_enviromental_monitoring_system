@@ -3,6 +3,7 @@ from paho.mqtt import client as mqtt_client
 import influxdb_client
 from influxdb_client import Point
 from influxdb_client.client.write_api import SYNCHRONOUS
+import yaml
 
 # mqtt variables
 broker = 'localhost'
@@ -17,7 +18,7 @@ client_id = f'subscribe-{random.randint(0, 100)}'
 # password: password
 bucket = "sensor_data"
 org = "iot_project"
-token = "NG8aNfKB4ETV9sXsrDPW4Nnxdl6C5Q5yhagI3PwEnw_eKua1T5fKSpy0fR0Wv8Fpz9IITi3pN83RdQg1S5iPMA=="
+token = "3WBNOqEAbSQJWAYWLvm-Cs0_PFgOk4Ir-MFOdknVzSgiEYcGhPpJGEJGaOqyKEOjKGB7IHCOTAyzGPU-yqkPOw=="
 url="http://localhost:8086"
 
 client_influxdb = influxdb_client.InfluxDBClient(
