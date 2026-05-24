@@ -13,10 +13,13 @@ add_executable(sensor_sim
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(MOSQUITTO REQUIRED libmosquitto)
+pkg_check_modules(YAMLCPP REQUIRED yaml-cpp>=0.5)
 
 include_directories(${MOSQUITTO_INCLUDE_DIRS})
+include_directories(${YAMLCPP_INCLUDE_DIRS})
 
 target_link_libraries(sensor_sim
-    mosquitto
+    ${MOSQUITTO_LIBRARIES}
+    ${YAMLCPP_LIBRARIES}
     pthread
 )

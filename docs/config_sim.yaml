@@ -1,10 +1,10 @@
 mqtt:
-  broker_ip: 192.168.1.17
+  broker_ip: localhost
   port: 1883
   topic_base: home
 
 influxdb:
-  ip: 192.168.1.17
+  ip: localhost
   port: 8086
   bucket: sensor_data
   org: iot_project

@@ -2,6 +2,7 @@
 #include <thread>
 #include <chrono>
 #include "sensor_node_sim.hpp"
+#include <yaml-cpp/yaml.h>
 
 using namespace std;
 
@@ -9,6 +10,9 @@ namespace mqtt_node {
 
     SensorNodeSim::SensorNodeSim(std::string room_name, float temp_mean, float hum_mean, float press_mean, float air_qual_mean, 
                     float temp_std, float hum_std, float press_std, float air_qual_std) {
+
+        // load yaml file
+        YAML::Node config_file = YAML::LoadFile("../../docs/config_sim.yaml");
 
         // Parameters initialization
         _temperature_mean = temp_mean;
@@ -48,7 +52,7 @@ namespace mqtt_node {
         mosquitto_disconnect_callback_set(client, on_disconnect_callback);
  
         // mqtt connection
-        mosquitto_connect(client, "localhost", 1883, 60);
+        mosquitto_connect(client, config_file["mqtt"]["broker_ip"].as<std::string>().c_str(), config_file["mqtt"]["port"].as<int>(), 60);
         mosquitto_loop_start(client);
 
     }

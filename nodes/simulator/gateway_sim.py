@@ -5,9 +5,13 @@ from influxdb_client import Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 import yaml
 
+with open("../../docs/config_sim.yaml", "r") as file:
+    config = yaml.safe_load(file)
+
+
 # mqtt variables
-broker = 'localhost'
-port = 1883
+broker = config["mqtt"]["broker_ip"]
+port = config["mqtt"]["port"]
 # Generate a Client ID with the subscribe prefix.
 client_id = f'subscribe-{random.randint(0, 100)}'
 # username = 'emqx'
@@ -16,10 +20,10 @@ client_id = f'subscribe-{random.randint(0, 100)}'
 # influxdb variables
 # username: marco
 # password: password
-bucket = "sensor_data"
-org = "iot_project"
-token = "3WBNOqEAbSQJWAYWLvm-Cs0_PFgOk4Ir-MFOdknVzSgiEYcGhPpJGEJGaOqyKEOjKGB7IHCOTAyzGPU-yqkPOw=="
-url="http://localhost:8086"
+bucket = config["influxdb"]["bucket"]
+org = config["influxdb"]["org"]
+token = config["influxdb"]["token"]
+url="http://" + config["influxdb"]["ip"] + ":" + str(config["influxdb"]["port"])
 
 client_influxdb = influxdb_client.InfluxDBClient(
    url=url,
@@ -43,12 +47,7 @@ def connect_mqtt() -> mqtt_client:
     )
     # client.username_pw_set(username, password)
     client.on_connect = on_connect
-    #try: 
     client.connect(broker, port)
-    #except Exception as e:
-    #    print(f"TCP connection failed: {e}")
-    #    client.disconnect()
-    #    client = None
 
     return client
 
