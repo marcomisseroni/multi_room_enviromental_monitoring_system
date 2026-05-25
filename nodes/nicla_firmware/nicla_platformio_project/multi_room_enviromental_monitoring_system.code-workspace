@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "../../.."
+		},
+		{
+			"name": "nicla_platformio_project",
+			"path": "."
+		}
+	],
+	"settings": {}
+}
