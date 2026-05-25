@@ -1,4 +1,6 @@
+bleak==3.0.2
 certifi==2026.4.22
+dbus-fast==5.0.10
 influxdb-client==1.50.0
 paho-mqtt==2.1.0
 python-dateutil==2.9.0.post0
