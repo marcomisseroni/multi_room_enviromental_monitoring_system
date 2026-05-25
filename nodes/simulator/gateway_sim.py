@@ -5,7 +5,7 @@ from influxdb_client import Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 import yaml
 
-with open("../../docs/config_sim.yaml", "r") as file:
+with open("../../config/config_sim.yaml", "r") as file:
     config = yaml.safe_load(file)
 
 

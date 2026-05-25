@@ -12,7 +12,7 @@ namespace mqtt_node {
                     float temp_std, float hum_std, float press_std, float air_qual_std) {
 
         // load yaml file
-        YAML::Node config_file = YAML::LoadFile("../../docs/config_sim.yaml");
+        YAML::Node config_file = YAML::LoadFile("../../config/config_sim.yaml");
 
         // Parameters initialization
         _temperature_mean = temp_mean;
