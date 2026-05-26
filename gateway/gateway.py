@@ -28,7 +28,7 @@ client_influxdb = influxdb_client.InfluxDBClient(
 write_api = client_influxdb.write_api(write_options=SYNCHRONOUS)
 
 # BLUETOOTH LOW ENERGY
-DEVICE_NAME = "NICLA_SENSOR"
+DEVICE1_NAME = "NICLA_ROOM1"
 MODEL_NBR_UUID = "2A6E"
 
 address = "69:29:AE:F3:75:10"
