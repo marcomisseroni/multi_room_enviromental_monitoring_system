@@ -35,7 +35,6 @@ void setup() {
   sensor_service.addCharacteristic(temp_char);
   sensor_service.addCharacteristic(press_char);
   sensor_service.addCharacteristic(hum_char);
-  sensor_service.addCharacteristic(iaq_char);
 
   BLE.setAdvertisedService(sensor_service);
   BLE.addService(sensor_service);
