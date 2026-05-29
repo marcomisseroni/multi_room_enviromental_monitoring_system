@@ -3,12 +3,11 @@ import influxdb_client
 from influxdb_client import Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 import yaml
-import argparse
 import signal
 import asyncio
 import contextlib
-import logging
 from typing import Iterable
+import logging
 
 from bleak import BleakClient, BleakScanner
 from bleak.backends.characteristic import BleakGATTCharacteristic
@@ -32,6 +31,9 @@ client_influxdb = influxdb_client.InfluxDBClient(
 )
 
 write_api = client_influxdb.write_api(write_options=SYNCHRONOUS)
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
+logger = logging.getLogger(__name__)
 
 # BLE
 device1 = "NICLA_ROOM1"
@@ -59,10 +61,14 @@ def decode(data):
     return struct.unpack('<f', data[:4])[0]
 
 
+def normalize_uuid(uuid: str) -> str:
+    return uuid.lower().replace("-", "")
+
+
 async def connect_to_device(
     lock: asyncio.Lock,
-    name_or_address: str,
-    notify_uuid: str,
+    name: str,
+    notify_uuids: Iterable[str],
     shutdown_event: asyncio.Event,
 ):
     async with contextlib.AsyncExitStack() as stack:
@@ -70,37 +76,60 @@ async def connect_to_device(
             # Trying to establish a connection to two devices at the same time
             # can cause errors, so use a lock to avoid this.
             async with lock:
-                device = await BleakScanner.find_device_by_name(name_or_address)
+                device = await BleakScanner.find_device_by_name(name)
 
                 if device is None:
+                    logger.warning("Device %s not found", name)
                     return
 
                 client = await stack.enter_async_context(BleakClient(device))
+                logger.info("Connected to device %s", name)
 
-            def callback(_: BleakGATTCharacteristic, data: bytearray) -> None:
-                value = decode(data)
-                if value is None:
-                    return
-                p = (
-                    Point("sensor_data")
-                    .tag("room", name_or_address)
-                    .tag("measurement_type", notify_uuid)
-                    .field("value", value)
-                )
-                queue.put_nowait(p)
+            measurement_names = {
+                normalize_uuid("2A6E"): "temperature",
+                normalize_uuid("2A6D"): "pressure",
+                normalize_uuid("2A6F"): "humidity",
+            }
+
+            def callback(measurement_type: str):
+                def inner(_: BleakGATTCharacteristic, data: bytearray) -> None:
+                    value = decode(data)
+                    if value is None:
+                        return
+
+                    meas = measurement_names.get(
+                        normalize_uuid(measurement_type),
+                        measurement_type,
+                    )
+                    
+                    p = (
+                        Point("sensor_data")
+                        .tag("room", name)
+                        .tag("measurement_type", meas)
+                        .field("value", value)
+                    )
+                    queue.put_nowait(p)
+
+                return inner
+
+            for notify_uuid in notify_uuids:
+                try:
+                    await client.start_notify(notify_uuid, callback(notify_uuid))
+                    logger.info("Started notify %s for %s", notify_uuid, name)
+                except Exception:
+                    logger.exception("Failed to start notify %s for %s", notify_uuid, name)
 
             # Start notifications and wait until shutdown_event is set.
             try:
-                await client.start_notify(notify_uuid, callback)
                 await shutdown_event.wait()
             finally:
                 # Ensure we always stop notifications before disconnecting.
-                try:
-                    await client.stop_notify(notify_uuid)
-                except Exception:
-                    return
+                for notify_uuid in notify_uuids:
+                    with contextlib.suppress(Exception):
+                        await client.stop_notify(notify_uuid)
 
         except Exception:
+            logger.exception("Error in connect_to_device for %s", name)
             return
 
 async def influx_writer(shutdown_event: asyncio.Event):
@@ -114,8 +143,9 @@ async def influx_writer(shutdown_event: asyncio.Event):
 
         try:
             write_api.write(bucket=bucket, org=org, record=item)
+            logger.debug("Wrote point to InfluxDB: %s", item)
         except Exception:
-            print("ERROR: Failed to write on Influxdb")
+            logger.exception("Failed to write on InfluxDB")
         finally:
             queue.task_done()
 
@@ -124,14 +154,14 @@ async def influx_writer(shutdown_event: asyncio.Event):
         item = await queue.get()
         try:
             write_api.write(bucket=bucket, org=org, record=item)
+            logger.debug("Wrote point to InfluxDB: %s", item)
         except Exception:
-            print("ERROR: Failed to write on Influxdb")
+            logger.exception("Failed to write on InfluxDB")
         finally:
             queue.task_done()
 
 async def main(
     addresses: Iterable[str],
-    uuids: Iterable[str],
 ):
     lock = asyncio.Lock()
     shutdown_event = asyncio.Event()
@@ -146,10 +176,26 @@ async def main(
 
     writer_task = asyncio.create_task(influx_writer(shutdown_event))
 
-    connect_tasks = [
-        asyncio.create_task(connect_to_device(lock, address, uuid, shutdown_event))
-        for address, uuid in zip(addresses, uuids)
+    # Quick test write to InfluxDB to verify connectivity
+    try:
+        test_point = Point("sensor_data").tag("room", "gateway").tag("measurement_type", "startup_test").field("value", 1.0)
+        write_api.write(bucket=bucket, org=org, record=test_point)
+        logger.info("Successfully wrote startup test point to InfluxDB")
+    except Exception:
+        logger.exception("Startup write to InfluxDB failed")
+
+    devices = [
+        (device1, [uuid1_temp, uuid1_press, uuid1_hum]),
+        (device2, [uuid2_temp, uuid2_press, uuid2_hum]),
+        (device3, [uuid3_temp, uuid3_press, uuid3_hum]),
     ]
+
+    connect_tasks = []
+    for address, uuids in devices:
+        task = asyncio.create_task(
+            connect_to_device(lock, address, uuids, shutdown_event)
+        )
+        connect_tasks.append(task)
 
     # Wait until all connect tasks complete (they wait on shutdown_event),
     # or until a signal sets shutdown_event.
@@ -166,9 +212,8 @@ async def main(
 if __name__ == "__main__":
     # Run monitoring for temperature UUIDs of the three devices by default.
     addresses = (device1, device2, device3)
-    uuids = (uuid1_temp, uuid2_temp, uuid3_temp)
 
     try:
-        asyncio.run(main(addresses, uuids))
+        asyncio.run(main(addresses))
     except KeyboardInterrupt:
         pass
