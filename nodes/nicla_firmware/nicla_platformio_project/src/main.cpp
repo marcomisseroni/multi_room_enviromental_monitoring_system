@@ -10,18 +10,23 @@ BLEService sensor_service("181A");
 BLEFloatCharacteristic temp_char("2A6E", BLERead | BLENotify);
 BLEFloatCharacteristic press_char("2A6D", BLERead | BLENotify);
 BLEFloatCharacteristic hum_char("2A6F", BLERead | BLENotify);
+BLEFloatCharacteristic iaq_char("0006", BLERead | BLENotify); // to check
 Sensor temperature(SENSOR_ID_TEMP);
 Sensor pressure(SENSOR_ID_BARO);
 Sensor humidity(SENSOR_ID_HUM);
+SensorBSEC air_quality(SENSOR_ID_BSEC);
 float temp;
 float press;
 float hum;
+uint32_t iaq; // to check
 
 void setup() {
   
   Serial.begin(115200);
   
   BHY2.begin(); // initialize BHY2 sensor (temperature, pressure, humidity)
+
+  air_quality.begin(); // initialize bsec sensor (air quality)
   pressure.begin();
   temperature.begin();
   humidity.begin();
@@ -35,6 +40,7 @@ void setup() {
   sensor_service.addCharacteristic(temp_char);
   sensor_service.addCharacteristic(press_char);
   sensor_service.addCharacteristic(hum_char);
+  sensor_service.addCharacteristic(iaq_char);
 
   BLE.setAdvertisedService(sensor_service);
   BLE.addService(sensor_service);
@@ -45,11 +51,15 @@ void setup() {
 
 void loop() {
   BHY2.update();
+
   temp = temperature.value();
   press = pressure.value();
   hum = humidity.value();
+  iaq = air_quality.co2_eq(); // to check
+
   temp_char.writeValue(temp);
   press_char.writeValue(press);
   hum_char.writeValue(hum);
+  iaq_char.writeValue(iaq);
   delay(1000);
 }

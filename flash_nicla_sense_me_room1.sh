@@ -4,4 +4,4 @@ cd nodes/nicla_firmware/nicla_platformio_project
 
 pio run -e nicla_room1 -t upload
 
-pio device monitor -b 115200
+#pio device monitor -b 115200

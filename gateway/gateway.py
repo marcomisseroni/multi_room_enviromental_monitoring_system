@@ -8,7 +8,6 @@ import asyncio
 import contextlib
 from typing import Iterable
 import logging
-
 from bleak import BleakClient, BleakScanner
 from bleak.backends.characteristic import BleakGATTCharacteristic
 
@@ -32,35 +31,40 @@ client_influxdb = influxdb_client.InfluxDBClient(
 
 write_api = client_influxdb.write_api(write_options=SYNCHRONOUS)
 
+# LOG
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 # BLE
-device1 = "NICLA_ROOM1"
-device2 = "NICLA_ROOM2"
-device3 =  "NICLA_ROOM3"
+device1 = config["ble"]["device1"]
+device2 = config["ble"]["device2"]
+device3 =  config["ble"]["device3"]
 
-uuid1_temp = "2A6E"
-uuid1_press = "2A6D"
-uuid1_hum = "2A6F"
+uuid1_temp = config["ble"]["temp_uuid"]
+uuid1_press = config["ble"]["press_uuid"]
+uuid1_hum = config["ble"]["hum_uuid"]
+uuid1_iaq = config["ble"]["air_q_uuid"]
 
-uuid2_temp = "2A6E"
-uuid2_press = "2A6D"
-uuid2_hum = "2A6F"
+uuid2_temp = config["ble"]["temp_uuid"]
+uuid2_press = config["ble"]["press_uuid"]
+uuid2_hum = config["ble"]["hum_uuid"]
+uuid2_iaq = config["ble"]["air_q_uuid"]
 
-uuid3_temp = "2A6E"
-uuid3_press = "2A6D"
-uuid3_hum = "2A6F"
+uuid3_temp = config["ble"]["temp_uuid"]
+uuid3_press = config["ble"]["press_uuid"]
+uuid3_hum = config["ble"]["hum_uuid"]
+uuid3_iaq = config["ble"]["air_q_uuid"]
 
-
+# queue of values got from the devices
 queue = asyncio.Queue()
 
 def decode(data):
     if len(data) < 4:
+        logger.warning("Data received is smaller than 4 bytes")
         return None
     return struct.unpack('<f', data[:4])[0]
 
-
+# To avoid mismatch if the uuid is expressed in short or full 128-bit
 def normalize_uuid(uuid: str) -> str:
     return uuid.lower().replace("-", "")
 
@@ -86,9 +90,10 @@ async def connect_to_device(
                 logger.info("Connected to device %s", name)
 
             measurement_names = {
-                normalize_uuid("2A6E"): "temperature",
-                normalize_uuid("2A6D"): "pressure",
-                normalize_uuid("2A6F"): "humidity",
+                normalize_uuid(config["ble"]["temp_uuid"]): "temperature",
+                normalize_uuid(config["ble"]["press_uuid"]): "pressure",
+                normalize_uuid(config["ble"]["hum_uuid"]): "humidity",
+                normalize_uuid(config["ble"]["air_q_uuid"]): "air_quality",
             }
 
             def callback(measurement_type: str):
@@ -185,9 +190,9 @@ async def main(
         logger.exception("Startup write to InfluxDB failed")
 
     devices = [
-        (device1, [uuid1_temp, uuid1_press, uuid1_hum]),
-        (device2, [uuid2_temp, uuid2_press, uuid2_hum]),
-        (device3, [uuid3_temp, uuid3_press, uuid3_hum]),
+        (device1, [uuid1_temp, uuid1_press, uuid1_hum, uuid1_iaq]),
+        (device2, [uuid2_temp, uuid2_press, uuid2_hum, uuid2_iaq]),
+        (device3, [uuid3_temp, uuid3_press, uuid3_hum, uuid3_iaq]),
     ]
 
     connect_tasks = []

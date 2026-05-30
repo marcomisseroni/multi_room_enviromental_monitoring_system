@@ -9,3 +9,13 @@ influxdb:
   bucket: sensor_data
   org: iot_project
   token: 3WBNOqEAbSQJWAYWLvm-Cs0_PFgOk4Ir-MFOdknVzSgiEYcGhPpJGEJGaOqyKEOjKGB7IHCOTAyzGPU-yqkPOw==
+
+ble:
+  temp_uuid: 2A6E
+  press_uuid: 2A6D
+  hum_uuid: 2A6F
+  air_q_uuid: "0006"
+  device1: "NICLA_ROOM1"
+  device2: "NICLA_ROOM2"
+  device3: "NICLA_ROOM3"
+  sensor_service: "181A"
