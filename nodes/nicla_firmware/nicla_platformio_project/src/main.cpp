@@ -10,7 +10,7 @@ BLEService sensor_service("181A");
 BLEFloatCharacteristic temp_char("2A6E", BLERead | BLENotify);
 BLEFloatCharacteristic press_char("2A6D", BLERead | BLENotify);
 BLEFloatCharacteristic hum_char("2A6F", BLERead | BLENotify);
-BLEFloatCharacteristic iaq_char("0006", BLERead | BLENotify); // to check
+BLEFloatCharacteristic iaq_char("12345678-1234-1234-1234-123456789004", BLERead | BLENotify); // to check
 Sensor temperature(SENSOR_ID_TEMP);
 Sensor pressure(SENSOR_ID_BARO);
 Sensor humidity(SENSOR_ID_HUM);
@@ -55,7 +55,7 @@ void loop() {
   temp = temperature.value();
   press = pressure.value();
   hum = humidity.value();
-  iaq = air_quality.co2_eq(); // to check
+  iaq = air_quality.co2_eq();
 
   temp_char.writeValue(temp);
   press_char.writeValue(press);

@@ -1,6 +1,6 @@
 #!/bin/bash 
 
-echo "----------------------Welcome to the IoT project simulation----------------------" 
+echo "----------------------Welcome to the IoT project gateway----------------------" 
 echo "Author: Marco Misseroni"
 
 # activate the virtual enviroment
