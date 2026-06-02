@@ -87,10 +87,10 @@ namespace mqtt_node {
         std::string press_payload = to_string(press);
         std::string air_q_payload = to_string(air_q);
 
-        mosquitto_publish(client, nullptr, _temp_topic.c_str(), temp_payload.size(), temp_payload.c_str(), 2, true);
-        mosquitto_publish(client, nullptr, _hum_topic.c_str(), hum_payload.size(), hum_payload.c_str(), 2, true);
-        mosquitto_publish(client, nullptr, _press_topic.c_str(),press_payload.size(), press_payload.c_str(), 2, true);
-        mosquitto_publish(client, nullptr, _air_q_topic.c_str(), air_q_payload.size(), air_q_payload.c_str(), 2, true);
+        mosquitto_publish(client, nullptr, _temp_topic.c_str(), temp_payload.size(), temp_payload.c_str(), 2, false);
+        mosquitto_publish(client, nullptr, _hum_topic.c_str(), hum_payload.size(), hum_payload.c_str(), 2, false);
+        mosquitto_publish(client, nullptr, _press_topic.c_str(),press_payload.size(), press_payload.c_str(), 2, false);
+        mosquitto_publish(client, nullptr, _air_q_topic.c_str(), air_q_payload.size(), air_q_payload.c_str(), 2, false);
 
         // handle mqtt errors
         return 0;

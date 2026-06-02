@@ -1,5 +1,6 @@
 import random
 from paho.mqtt import client as mqtt_client
+from paho.mqtt.subscribeoptions import SubscribeOptions
 import influxdb_client
 from influxdb_client import Point
 from influxdb_client.client.write_api import SYNCHRONOUS
@@ -43,6 +44,7 @@ def connect_mqtt() -> mqtt_client:
 
     client = mqtt_client.Client(
         client_id=client_id,
+        protocol=mqtt_client.MQTTv5,
         callback_api_version=mqtt_client.CallbackAPIVersion.VERSION2,
     )
     # client.username_pw_set(username, password)
@@ -60,7 +62,7 @@ def subscribe(client: mqtt_client):
         p = Point("sensor_data").tag("room", room).tag("measurement_type", meas_type).field("value", float(msg.payload.decode()))
         write_api.write(bucket=bucket, org=org, record=p)
 
-    client.subscribe("home/#")
+    client.subscribe("home/#", options=SubscribeOptions(qos=1, retainHandling=2))
     client.on_message = on_message
 
 

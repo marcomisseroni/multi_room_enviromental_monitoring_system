@@ -31,10 +31,10 @@ namespace mqtt_node {
             float _pressure_std;
             float _air_quality_std;
             int _seed;
-            std::string _temp_topic = "temperature_sensor";
-            std::string _hum_topic = "humidity_sensor";
-            std::string _press_topic = "pressure_sensor";
-            std::string _air_q_topic = "air_quality_sensor";
+            std::string _temp_topic = "temperature";
+            std::string _hum_topic = "humidity";
+            std::string _press_topic = "pressure";
+            std::string _air_q_topic = "air_quality";
             std::string _room_name;
             int _room_id;
             std::default_random_engine generator;
