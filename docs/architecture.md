@@ -18,9 +18,11 @@ Distributed IoT system for environmental monitoring using BLE sensors and Raspbe
 
 ### Database
 - Stores time-series environmental data
+- InfluxDB
 
 ### Dashboard
 - Visualizes real-time and historical data
+- Grafana
 
 ---
 
@@ -32,12 +34,7 @@ Sensor Node → BLE → Gateway → Database → Dashboard
 
 ## Communication Protocols
 
-- BLE for node → gateway communication
-- MQTT (optional in simulation phase)
-- HTTP for dashboard API
-
----
-
-## System Diagram
-
-(Add image here)
+- BLE for sensor node → gateway communication
+- MQTT for data transmission during the simulation phase
+- HTTP for database communication (InfluxDB API)
+- HTTP for dashboard data retrieval and visualization (Grafana API)

@@ -24,13 +24,14 @@ The system is composed of:
 
 - **Dashboard**
   - Displays real-time and historical data
-  - Web-based interface
+  - Web-based interface (Grafana)
 
 ---
 
 ## Communication
 
 The system uses **Bluetooth Low Energy (BLE)** for communication between sensor nodes and the Raspberry Pi gateway.
+It is also used HTTP for the API of InfluxDB and Grafana
 
 ---
 
